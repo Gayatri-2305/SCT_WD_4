@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>To-Do List App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .todo-app {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 1em;
+    }
+    button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .task-list {
+      margin-top: 20px;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #eee;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .task-item.completed span {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .task-details {
+      flex-grow: 1;
+      padding: 0 10px;
+    }
+    .task-actions button {
+      margin-left: 5px;
+    }
+    .task-meta {
+      font-size: 0.85em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-app">
+    <h1>To-Do List</h1>  
+    <div class="input-group">
+      <input type="text" id="taskText" placeholder="Task description" />
+      <input type="datetime-local" id="taskDateTime" />
+      <input type="text" id="taskCategory" placeholder="Category (e.g., Work, Home)" />
+      <button onclick="addTask()">Add Task</button>
+    </div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+  <script>
+    let tasks = [];
+    function renderTasks() {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const taskItem = document.createElement('div');
+        taskItem.className = 'task-item' + (task.completed ? ' completed' : '');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.onchange = () => toggleComplete(index);
+        const taskDetails = document.createElement('div');
+        taskDetails.className = 'task-details';
+        taskDetails.innerHTML = `
+          <span>${task.text}</span><br/>
+          <div class="task-meta">
+            ${task.datetime ? new Date(task.datetime).toLocaleString() : ''} | ${task.category || ''}
+          </div>
+        `;
+        const actions = document.createElement('div');
+        actions.className = 'task-actions';
+        actions.innerHTML = `
+          <button onclick="editTask(${index})">Edit</button>
+          <button onclick="deleteTask(${index})">Delete</button>
+        `;
+        taskItem.appendChild(checkbox);
+        taskItem.appendChild(taskDetails);
+        taskItem.appendChild(actions);
+
+        taskList.appendChild(taskItem);
+      });
+    }
+    function addTask() {
+      const text = document.getElementById('taskText').value.trim();
+      const datetime = document.getElementById('taskDateTime').value;
+      const category = document.getElementById('taskCategory').value.trim();
+      if (text === '') {
+        alert('Task description cannot be empty!');
+        return;
+      }
+      tasks.push({
+        text,
+        datetime,
+        category,
+        completed: false
+      });
+      clearInputs();
+      renderTasks();
+    }
+    function clearInputs() {
+      document.getElementById('taskText').value = '';
+      document.getElementById('taskDateTime').value = '';
+      document.getElementById('taskCategory').value = '';
+    }
+    function toggleComplete(index) {
+      tasks[index].completed = !tasks[index].completed;
+      renderTasks();
+    }
+    function editTask(index) {
+      const task = tasks[index];
+      const newText = prompt('Edit task description:', task.text);
+      if (newText !== null) {
+        const newDatetime = prompt('Edit date/time (YYYY-MM-DDTHH:MM):', task.datetime);
+        const newCategory = prompt('Edit category:', task.category);
+        tasks[index] = {
+          text: newText,
+          datetime: newDatetime,
+          category: newCategory,
+          completed: task.completed
+        };
+        renderTasks();
+      }
+    }
+    function deleteTask(index) {
+      if (confirm('Delete this task?')) {
+        tasks.splice(index, 1);
+        renderTasks();
+      }
+    }
+    // Initialize empty render
+    renderTasks();
+  </script>
+</body>
+</html>
